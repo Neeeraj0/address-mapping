@@ -56,7 +56,7 @@ export default function Home() {
   }, [searchTerm, customers]);
 
   const handleAddAddress = () => {
-    if (newAddress) {
+    if (newAddress.line1 && newAddress.line2 && newAddress.state && newAddress.city && newAddress.pincode) {
       const customer = { ...filteredCustomers[0] };
       
       if (!customer.shipping_address) {
@@ -70,6 +70,8 @@ export default function Home() {
       setFilteredCustomers(updatedCustomers);
   
       console.log('Updated filtered customers with new address:', updatedCustomers);
+    }else{
+      toast.error('No address provided! Please fill the details!');
     }
   
     setNewAddress({
@@ -96,6 +98,24 @@ export default function Home() {
     console.log('selected index:', selectedAddressIndex);
   }, [selectedAddressIndex]);
 
+  const stateCityData = {
+    Maharashtra: ['Mumbai', 'Pune'],
+    Delhi: ['Delhi NCR'],
+    Goa: ['Goa'],
+    TamilNadu: ['Chennai']
+  };
+
+  const handleCancel = () => {
+    setShowModal(false);
+    setNewAddress({
+      line1: "",
+      line2: "",
+      state: "",
+      city: "",
+      pincode: ""
+    });
+  }
+
 
   const handleSubmit = async () => {
     try {
@@ -120,7 +140,7 @@ export default function Home() {
           description: `customer location mapping`,
           address: [
             {
-              location: `${selectedAddress.line2}, ${selectedAddress.city}, ${selectedAddress.pincode}`
+              location: `${selectedAddress.line1}, ${selectedAddress.line2}, ${selectedAddress.state},  ${selectedAddress.city}, ${selectedAddress.pincode}`
             }
           ],
           client_number: mobile,
@@ -286,7 +306,7 @@ export default function Home() {
                     onChange={(e) => setNewAddress({ ...newAddress, line2: e.target.value })}
                     className="block w-full px-4 py-2 mt-2 border border-gray-300 rounded-md text-black"
                   />
-                  <input
+                  {/* <input
                     type="text"
                     placeholder="State"
                     value={newAddress.state}
@@ -299,7 +319,33 @@ export default function Home() {
                     value={newAddress.city}
                     onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
                     className="block w-full px-4 py-2 mt-2 border border-gray-300 rounded-md text-black"
-                  />
+                  /> */}
+                   <select
+                      value={newAddress.state}
+                      onChange={(e) => {
+                        const selectedState = e.target.value;
+                        setNewAddress({ ...newAddress, state: selectedState, city: "" }); // Reset city when state changes
+                      }}
+                      className="block w-full px-4 py-2 mt-2 border border-gray-300 rounded-md text-black"
+                    >
+                      <option value="" disabled>Select State</option>
+                      {Object.keys(stateCityData).map((state) => (
+                        <option key={state} value={state}>{state}</option>
+                      ))}
+                    </select>
+
+                    {/* City Dropdown */}
+                  <select
+                      value={newAddress.city}
+                      onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                      className="block w-full px-4 py-2 mt-2 border border-gray-300 rounded-md text-black"
+                      disabled={!newAddress.state} // Disable if no state is selected
+                    >
+                      <option value="" disabled>Select City</option>
+                      {newAddress.state && stateCityData[newAddress.state].map((city) => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                  </select>
                   <input
                     type="text"
                     placeholder="Pincode"
@@ -318,7 +364,7 @@ export default function Home() {
                   </button>
                   <button
                     className="ml-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-md"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => handleCancel()}
                   >
                     Cancel
                   </button>
@@ -329,7 +375,9 @@ export default function Home() {
 
           <div className="flex justify-end mt-6">
           
-            <button className="px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600"
+            <button className={`px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600 ${
+            !selectedAddressIndex && !searchTerm ? "opacity-50 cursor-not-allowed" : ""
+            }`}
               onClick={() => handleSubmit()}
             >
               <SaveIcon className="inline-block w-5 h-5 mr-2" /> 
