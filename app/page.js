@@ -163,7 +163,7 @@ export default function Home() {
           issueObserved: "Water Dripping from AC",
           note: "Any additional notes here",
           complaintRaised: new Date().toISOString(),  
-          assignedTechnicians: ["pranshi"]  
+          assignedTechnicians: ["Piyush Randhwan"]  
         };
 
         console.log('task data', taskData);
